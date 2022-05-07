@@ -5,9 +5,8 @@ config();
 export const BOT_TOKEN = process.env.BOT_TOKEN;
 
 // ### BOT CONFIG
-export const botId = '969310807076790312';
-export const guildId = '963539787019599953';
-export const channelId = '969317896432009216';
+export const botId = process.env.BOT_ID;
+export const guildId = process.env.GUIILD_ID;
 
 // ### intents calculator https://ziad87.net/intents/
 // intents: [
@@ -25,8 +24,7 @@ export const intents = 46859;
 
 export const owners = [
 	{
-		id: '790552703058837514',
-		discriminator: '7727',
+		id: process.env.OWNER_ID,
 	}
 ]
 
@@ -34,7 +32,6 @@ export default {
 	BOT_TOKEN,
 	botId,
 	guildId,
-	channelId,
 	owners,
 	intents,
 }

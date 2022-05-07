@@ -1,5 +1,7 @@
 # readme
 
+Adjust `.env`
+
 Use `npm run deploy` to register slash commands via discord api and make them accessible to the user.
 
 Use `npm run dev` for development.
