@@ -6,7 +6,7 @@ export const BOT_TOKEN = process.env.BOT_TOKEN;
 
 // ### BOT CONFIG
 export const botId = process.env.BOT_ID;
-export const guildId = process.env.GUIILD_ID;
+export const guildId = process.env.GUILD_ID;
 
 // ### intents calculator https://ziad87.net/intents/
 // intents: [
