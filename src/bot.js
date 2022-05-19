@@ -4,9 +4,9 @@ import {
 } from "discord.js";
 
 import config from './config.js';
-import commands from './commands.js';
-import logger from './utils.js';
-import presences from './presences.js';
+import commands from './handlers/commands.js';
+import presences from './handlers/presences.js';
+import { logger } from './handlers/utils.js';
 
 const client = new Client({ intents: config.intents });
 
@@ -42,7 +42,7 @@ const onReady = async (client) => {
  */
 const onInteractionCreate = async (client, interaction) => {
 	// @debug
-	console.log(logger.yellow, `${logger.time()} ${interaction.user.tag} triggered an ${interaction.constructor.name}.`);
+	console.log(logger.red, `${logger.time()} ${interaction.user.tag} triggered an ${interaction.constructor.name}.`);
 
 	if (interaction.isCommand()) {
 		const { commandName, options } = interaction;
@@ -77,5 +77,5 @@ process.on('unhandledRejection', console.error);
 
 	await client.login(config.BOT_TOKEN);
 
-	console.log(logger.cyan, `${logger.time()} Bot logged in as ${client.user.tag}`);
+	console.log(logger.green, `${logger.time()} Bot logged in as ${client.user.tag}`);
 })();

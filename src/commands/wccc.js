@@ -1,5 +1,5 @@
 import { Constants } from 'discord.js';
-import config from './wccc/config.js';
+import settings from './wccc/settings.js';
 import guide from './wccc/guide.js';
 import past from './wccc/past.js';
 import topics from './wccc/topics.js';
@@ -11,7 +11,7 @@ export const data = {
 	description: `Create a voting! Collect topic suggestions and let users vote with emoji reactions.`,
 	options: [
 		{
-			name: 'config',
+			name: 'settings',
 			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
 			description: `Configurates settings.`,
 		},
@@ -44,7 +44,7 @@ export const data = {
 };
 
 const handler = {
-	config,
+	config: settings,
 	guide,
 	past,
 	topics,

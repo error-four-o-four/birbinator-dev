@@ -19,6 +19,6 @@ const createCommands = async (path) => {
 	return commands;
 };
 
-export default await createCommands('./commands/');
+export default await createCommands('../commands/');
 
 

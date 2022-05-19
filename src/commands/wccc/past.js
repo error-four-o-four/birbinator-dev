@@ -1,5 +1,6 @@
 import { Client, Interaction } from 'discord.js';
-import texts from './assets/texts.js';
+import texts from './assets/messages.js';
+
 /**
  *
  * @param {Client} client

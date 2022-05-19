@@ -1,9 +1,17 @@
-import { Client, Constants, Interaction } from 'discord.js';
-import presences from '../../presences.js';
+import {
+	Client,
+	Constants,
+	Interaction
+} from 'discord.js';
+
+import presences from '../../handlers/presences.js';
 import controller from './assets/controller.js';
-import { getDefaultEmbed, getPromptComponents } from './assets/elements.js';
-import settings from './assets/settings.js';
 import customIds from './assets/identifiers.js';
+
+import getElement from './assets/elements.js';
+
+
+// import { evaluateTopicEmojis, hasEmojiDuplicates } from './assets/utils.js';
 
 /**
  * @param {Client} client
@@ -11,9 +19,7 @@ import customIds from './assets/identifiers.js';
  */
 export default async (client, interaction) => {
 	// check state
-	if (!controller.check(interaction)) return;
-
-	console.log(controller.state);
+	if (!controller.checkState(interaction)) return;
 
 	// send 'thinking ...'
 	const sent = await interaction.deferReply({ fetchReply: true });
@@ -24,76 +30,57 @@ export default async (client, interaction) => {
 	const voting = await sendDirectMessages(interaction.user);
 
 	if (!voting) {
-		/** @todo reset controller? */
-		controller.state.index = 2;
-		controller.state.active = false;
 		await sent.delete();
 		return;
 	}
 
-	const embed = getDefaultEmbed(client);
-	embed.title = '**Time to vote**!';
-	embed.description = `These are the topics for the **#WCCChallenge**\n\n${getVotingListContent()}`;
+	// notify users to give their votes
+	const embed = getElement.embeds.votingMain(client, controller.topics);
 
 	// notify users to vote a topic
 	await interaction.editReply({
 		embeds: [embed]
 	});
 
-	controller.voteCollector = createVoteCollector(sent);
-
 	// add emojis to reply
-	for (const topic of controller.topics) {
-		await sent.react(topic.emoji);
-	}
+	await controller.startCollectingVotes(sent);
+
+	controller.voteCollector.on('end', evaluateVotes.bind(null, client, interaction));
 
 	// update client
 	client.user.setPresence(presences.getVotingTime());
-
-	controller.voteCollector.on('collect', collectVote);
-	controller.voteCollector.on('remove', removeVote);
-	controller.voteCollector.on('end', evaluateVotes.bind(null, client, interaction));
-
-	/** @todo integrate notions api */
 };
 
-const createVoteCollector = (message) => {
-	return message.createReactionCollector({
-		time: settings[customIds.config[2]],
-		dispose: true,
-	});
-};
-
-const collectVote = async (reaction) => {
-	const topic = controller.topics.filter((topic) => topic.emoji === reaction.emoji.toString())[0];
-	topic.votes += 1;
-};
-
-const removeVote = async (reaction) => {
-	const topic = controller.topics.filter((topic) => topic.emoji === reaction.emoji.toString())[0];
-	topic.votes -= 1;
-};
-
-const evaluateVotes = async (client, interaction) => {
-	const reducer = (result, current) => (current.votes > result.votes) ? current : result;
-	const winner = controller.topics.reduce(reducer, controller.topics[0]);
-
-	/** @todo topics with same reaction count */
-	console.log(winner);
-
-	/** @todo reset controller? */
-	controller.stop();
-	controller.state.index = 0;
+const evaluateVotes = async (client, interaction, collected) => {
+	const emojis = controller.topics.map((t) => t.emoji);
+	const filter = (c) => emojis.includes(c.emoji.toString());
+	const sorter = (a, b) => b.count - a.count;
+	const sorted = collected.filter(filter).sort(sorter);
+	const count = sorted.first().count;
+	const isDraw = sorted.filter((c) => c.count === count).size > 1;
 
 	const embed = getDefaultEmbed(client);
+
+	if (isDraw) {
+		embed.title = '**It\'s a draw!**';
+		embed.description = `You have another ${controller.settings[customIds.config[2]]} to vote a winner.`;
+		const sent = await interaction.followUp({
+			embeds: [embed]
+		});
+		/** @error .map is not a function */
+		const finalEmojis = sorted.values().map((s) => s.emoji.toString())
+		const finalTopics = controller.topics.filter((t) => finalEmojis.includes(t.emoji));
+		controller.startCollectingVotes(sent, finalTopics);
+		return;
+	}
+
+	const winner = controller.topics.filter((t) => t.emoji === sorted.first().emoji.toString());
 	embed.title = '**Looks like we have a winner!**';
 	embed.description = `The topic of this week is:\n${winner.emoji} **${winner.content}**\nwith ${winner.votes} votes.`;
 
 	await interaction.followUp({
 		embeds: [embed]
 	});
-
-	controller.topics = [];
 
 	// update bot info
 	client.user.setPresence(presences.getDefault(client));
@@ -119,15 +106,19 @@ const sendDirectMessages = async (user) => {
 			reactionCollectors.push(collector);
 
 			collector.on('collect', async (reaction) => {
-				/** @todo gnaaa emoji object */
-				topic.reacted = true;
-				topic.emoji = reaction.emoji.toString();
+				// assign emoji to topic
+				controller.submitReaction(topic, reaction);
 
-				if (checkReactions()) return;
+				// check if all sent messages have a reaction
+				if (!controller.evaluateReactions()) return;
 
-				/** @todo check if messages/topics have the same emoji */
+				// check duplicates
+				if (controller.checkReactionDuplicates()) {
+					await directMessage.edit('**There are duplicates**.\nPlease use different emojis.');
+					return;
+				}
 
-				// send a prompt when all messages have a emoji reaction
+				// send a prompt when all sent messages have a reaction
 				// promise prompt interaction
 				const resolvedPrompt = await sendPrompt(directMessage, user);
 				const resolvedMessage = (resolvedPrompt)
@@ -139,7 +130,7 @@ const sendDirectMessages = async (user) => {
 					await reactionCollector.message.delete();
 					reactionCollector.stop();
 				}
-				await directMessage.edit(resolvedMessage);
+				directMessage.edit(resolvedMessage);
 
 				resolve(resolvedPrompt);
 			});
@@ -147,9 +138,6 @@ const sendDirectMessages = async (user) => {
 	});
 };
 
-const checkReactions = () => {
-	return (controller.topics.filter((t) => !t.reacted).length > 0);
-};
 
 const sendPrompt = async (directMessage, user) => {
 	return new Promise(async (resolve) => {

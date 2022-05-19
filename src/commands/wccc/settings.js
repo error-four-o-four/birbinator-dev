@@ -1,9 +1,19 @@
-import { ButtonInteraction, Client, Interaction, InteractionCollector } from 'discord.js';
-import { getDefaultEmbed, getDefaultComponents, getEditingComponents, getOnExitReply } from './assets/elements.js';
+import {
+	ButtonInteraction,
+	Client,
+	Interaction,
+	InteractionCollector
+} from 'discord.js';
+
+import controller from './assets/controller.js';
 import customIds from './assets/identifiers.js';
-import settings from './assets/settings.js';
-import { getDefaultContent, getEditingContent } from './assets/texts.js';
-import { createClickCollector } from './assets/utils.js';
+
+import getElement from './assets/elements.js';
+
+import getComponents from './assets/components.js';
+import { settings as getMessage } from './assets/messages.js';
+
+import { createClickCollector, convertDuration } from '../../handlers/utils.js';
 
 /**
  *
@@ -13,25 +23,25 @@ import { createClickCollector } from './assets/utils.js';
 export default async (client, interaction) => {
 	const clickCollector = createClickCollector(interaction);
 
-	let embed = { ...getDefaultEmbed(client), ...getDefaultContent(settings) };
-	let components = getDefaultComponents();
+	const embed = getElement.embeds.settings.main(client);
+	const components = getComponents.settings.main();
 
 	await interaction.reply({
 		embeds: [embed],
-		components: components,
-		ephemeral: true
+		ephemeral: true,
+		components,
 	});
 
 	// collect interactions
 	clickCollector.on('collect', async (clickInteraction) => {
 		if (!clickInteraction) return;
-		/** @todo?? add guard clause: !customIds.inlucdes(btnInteraction.customId) */
+		/** @todo?? add guard cause: !customIds.inlucdes(btnInteraction.customId) */
 
 		await clickInteraction.deferUpdate();
 
 		// listen for button interactions
 		if (clickInteraction.isButton()) {
-			await handleButton(clickInteraction, clickCollector, embed, components);
+			await handleButton(clickInteraction, clickCollector, embed);
 			return;
 		}
 
@@ -43,9 +53,15 @@ export default async (client, interaction) => {
 	});
 
 	clickCollector.on('end', async (collected, reason) => {
-		settings.resetSelection();
+		const message = `Ended settings configuration. ${(reason === 'time') ? 'Time has expired.' : 'By User.'}`;
+
+		controller.resetSelection();
 		if (reason === 'time' || reason === 'ended') {
-			interaction.editReply(getOnExitReply(reason));
+			interaction.editReply({
+				content: message,
+				embeds: [],
+				components: [],
+			});
 			return;
 		}
 		/** @todo else? */
@@ -57,44 +73,48 @@ export default async (client, interaction) => {
  * @param {ButtonInteraction} interaction
  * @param {InteractionCollector} collector
  * @param {object} embed
- * @param {array} components
  */
-const handleButton = async (interaction, collector, embed, components) => {
+const handleButton = async (interaction, collector, embed) => {
 	const { customId } = interaction;
+	let components;
 
 	// Clicked 'exit' - emit end of interaction
 	if (customId === customIds.prompt[0]) {
-		settings.resetSelection();
+		controller.resetSelection();
 		collector.stop('ended');
 		return;
 	}
 
 	// Clicked 'back' - return to config menu
 	if (customId === customIds.prompt[1]) {
-		settings.resetSelection();
-		embed = { ...embed, ...getDefaultContent(settings) };
-		components = getDefaultComponents();
+		controller.resetSelection();
+		// embed.title = 'These are your WCCC Settings';
+		embed.description = controller.settingsDescription;
+		// embed = { ...embed, ...getMessage.main(controller.settings) };
+		components = getComponents.main();
 	}
 
 	// Clicked Submit
 	if (customId === customIds.prompt[3]) {
-		if (!settings.selection.value) {
+		if (!controller.getSelectionValue()) {
 			embed.description = ':warning: No value selected!';
-			components = getEditingComponents(customId);
+			components = getComponents.edit(customId);
 		}
 		else {
-			settings.submitSelection();
-			settings.resetSelection();
-			embed = { ...embed, ...getDefaultContent(settings) };
-			components = getDefaultComponents();
+			controller.submitSelection();
+			controller.resetSelection();
+			// embed.title = 'These are your WCCC Settings';
+			embed.description = controller.settingsDescription;
+			// embed = { ...embed, ...getMessage.main(controller.settings) };
+			components = getComponents.main();
 		}
 	}
 
 	// Clicked config button - display editing menu
 	if (customIds.config.slice(0, 3).includes(customId)) {
-		settings.selection.customId = customId;
-		embed = { ...embed, ...getEditingContent(customId) };
-		components = getEditingComponents(customId);
+		controller.setSelectionId(customId);
+		embed.description = controller.settingsDescriptionValue;
+		components = getComponents.edit(customId);
 	}
 
 	await interaction.editReply({
@@ -113,7 +133,6 @@ const handleButton = async (interaction, collector, embed, components) => {
  * @param {array} components
  */
 const handleSelection = async (interaction, collector) => {
-	settings.selection.type = interaction.customId;
-	settings.selection.value = parseInt(interaction.values[0]);
+	controller.setSelectionValue(interaction);
 	collector.resetTimer();
 };

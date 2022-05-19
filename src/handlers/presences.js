@@ -1,4 +1,4 @@
-import config from './config.js';
+import config from '../config.js';
 
 const getDefault = (client) => {
 	const guild = client.guilds.cache.get(config.guildId);

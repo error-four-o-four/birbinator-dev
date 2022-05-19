@@ -37,9 +37,6 @@ export const execute = async (client, interaction) => {
 
 	await interaction.reply({ content: 'Fetching...', fetchReply: true });
 
-	// @debug
-	// console.log('command mdn.js \n', query, interaction.options.data, interaction.options.resolved);
-
 	try {
 		const { documents, metadata } = await fetch(`${uri}${query}`).then((res) => res.json());
 

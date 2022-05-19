@@ -1,11 +1,19 @@
-import { Client, Interaction, Message, MessageCollector } from 'discord.js';
-import presences from '../../presences.js';
+import {
+	Client,
+	Interaction,
+	Message,
+	MessageCollector
+} from 'discord.js';
+
+import { createPromptCollector } from '../../handlers/utils.js';
+
+import presences from '../../handlers/presences.js';
 import controller from './assets/controller.js';
-import { getPromptComponents } from './assets/elements.js';
-import customIds from './assets/identifiers.js';
-import settings from './assets/settings.js';
-import { topicTexts } from './assets/texts.js';
-import { createPromptCollector, validateTopic } from './assets/utils.js';
+
+import getElement from './assets/elements.js';
+import getComponent from './assets/components.js';
+
+import { topics as getMessage } from './assets/messages.js';
 
 /**
  * @param {Client} client
@@ -13,50 +21,41 @@ import { createPromptCollector, validateTopic } from './assets/utils.js';
  */
 export default async (client, interaction) => {
 	// check state
-	if (!controller.check(interaction)) return;
+	if (!controller.checkState(interaction)) return;
 
 	// make collector accessible
-	controller.topicCollector = interaction.channel.createMessageCollector({
-		filter: (msg) => msg.content.startsWith('topic'),
-		time: settings[customIds.config[0]],
-	});
+	controller.startCollectingTopics(interaction);
 
 	// show default message
+	const embed = getElement.embeds.topicsMain(client);
+	// const embed = {
+	// 	...getElement.embeds.default(client),
+	// 	...getMessage.main(),
+	// };
+
 	await interaction.reply({
-		content: topicTexts.start,
+		embeds: [embed]
 	});
 
 	// update client
 	client.user.setPresence(presences.getTopicTime());
 
-	controller.topicCollector.on('collect', collectTopic.bind(null, controller.topicCollector));
+	// await events
+	controller.topicCollector.on('collect', collectTopic);
 	controller.topicCollector.on('end', evaluateTopics.bind(null, client, interaction));
 };
-
-const createTopicData = (content) => {
-	return {
-		content,
-		reacted: false,
-		emoji: undefined,
-		votes: 0,
-	}
-}
 
 /**
  * @param {MessageCollector} collector
  * @param {Message} message
  * @returns
  */
-const collectTopic = async (collector, message) => {
-	const topic = validateTopic(message.content);
-	const reply = {
-		content: undefined,
-		ephemeral: true,
-		components: [],
-	};
+const collectTopic = async (message) => {
+	const topic = controller.validateTopic(message.content);
+	const reply = getElement.replies.ephemeral();
 
 	if (!topic) {
-		reply.content = topicTexts.onPrompt();
+		reply.content = getMessage.userPrompt();
 		message.reply(reply);
 		return;
 	}
@@ -64,7 +63,7 @@ const collectTopic = async (collector, message) => {
 	// listen for incoming messages
 	const promptCollector = createPromptCollector(message);
 	reply.content = `Do you want to submit: **${topic}**`;
-	reply.components = getPromptComponents();
+	reply.components = getComponent.prompt();
 
 	// assign sent message to edit it afterwards
 	const sent = await message.reply(reply);
@@ -73,46 +72,37 @@ const collectTopic = async (collector, message) => {
 	promptCollector.on('end', async (collected, reason) => {
 
 		if (reason === 'time' || collected.first().customId === 'prompt_cancel') {
-			reply.content = (reason === 'time') ? topicTexts.onPrompt(reason) : topicTexts.onPrompt('canceled');
+			reply.content = (reason === 'time') ? getMessage.userPrompt(reason) : getMessage.userPrompt('canceled');
 			reply.components = [];
 			await sent.edit(reply);
 			return;
 		}
 
+		// submit topic
+		// controller checks amount of collected topics
+		// and stops the collector
 		if (collected.first().customId === 'prompt_confirm') {
-			/** @todo create topic data */
-			// console.log(controller.topics);
-			controller.topics.push(createTopicData(topic));
+			controller.submitTopic(topic, message.author);
 			message.react('✅');
-		}
-
-		if (controller.topics.length >= settings[customIds.config[1]]) {
-			collector.stop('amount');
 		}
 
 		await sent.delete();
 	});
 };
 
-const evaluateTopics = async (client, interaction, collected, reason) => {
+const evaluateTopics = async (client, interaction) => {
 	// update controller
-	controller.stop();
-
-	if (collected.size === 0) {
-		reason = 'none';
-		/** @todo reset controller? */
-		controller.state.index = 0;
-	}
+	controller.stopCollectingTopics();
 
 	// notify users
 	await interaction.channel.send({
-		content: topicTexts.onEndCollecting(reason),
+		content: getMessage.collected(controller.topics),
 	});
 
 	// notify 'moderator'
 	/** @todo notification role? */
 	await interaction.followUp({
-		content: topicTexts.onEndCollectingNotification(interaction.user.id),
+		content: getMessage.notification(interaction.user.id, controller.topics),
 		ephemeral: true
 	});
 

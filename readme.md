@@ -8,9 +8,9 @@ Use `npm run dev` for development.
 
 <br>
 
-`bot.js` - entry point
+`scr/bot.js` - entry point
 
-`command.js` - *exports* command collection
+`src/command.js` - *exports* command collection
 
 <br>
 
@@ -22,19 +22,30 @@ Commands are made of a property 'data' and a method 'execute'
 
 # todos / ideas
 
+* update wccc readme
+
 ### commands:
-* add code comments
 * info
 	- additonal user data 'roles', 'moderatable'
 	- server info 'rules' channel
+* faq
+	- message content
+* wccc/vote
+	- l:32, l:80 controller
+	- voting ended in a draw
+	- notion
 
 ### permissions
 ### webhooks
-### rollup
 ### debugging
+* add code comments
+* typos
 
 ### structure / files
 * functions/ folder?
 * presences.js
   - so far only used by /wccc command
 	- move to commands/wccc/assets ?
+* commands/wccc/assets/utils.js => general utils ?
+
+### rollup

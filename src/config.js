@@ -7,6 +7,7 @@ export const BOT_TOKEN = process.env.BOT_TOKEN;
 // ### BOT CONFIG
 export const botId = process.env.BOT_ID;
 export const guildId = process.env.GUILD_ID;
+export const notifyId = process.env.NOTIFY_ID;
 
 // ### intents calculator https://ziad87.net/intents/
 // intents: [
@@ -32,6 +33,7 @@ export default {
 	BOT_TOKEN,
 	botId,
 	guildId,
+	notifyId,
 	owners,
 	intents,
 }
