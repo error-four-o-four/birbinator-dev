@@ -1,75 +1,75 @@
-import { Constants } from 'discord.js';
-import { convertDuration } from '../../../handlers/utils.js';
+// import { Constants } from 'discord.js';
+// import { convertDuration } from '../../../handlers/utils.js';
 
-import controller from './controller.js';
-import customIds from './identifiers.js';
+// import controller from './controller.js';
+// import customIds from './identifiers.js';
 
-import messages from './messages.js';
+// import messages from './messages.js';
 
-export const getDefaultEmbed = (client) => {
-	return {
-		type: 'rich',
-		thumbnail: {
-			url: client.user.avatarURL(),
-		}
-	};
-};
+// export const getDefaultEmbed = (client) => {
+// 	return {
+// 		type: 'rich',
+// 		thumbnail: {
+// 			url: client.user.avatarURL(),
+// 		}
+// 	};
+// };
 
-const getSettingsMainEmbed = (client) => {
-	return {
-		...getDefaultEmbed(client),
-		...messages.settings.main()
-	}
-}
+// const getSettingsMainEmbed = (client) => {
+// 	return {
+// 		...getDefaultEmbed(client),
+// 		...messages.settings.main()
+// 	}
+// }
 
-const getTopicsMainEmbed = (client) => {
-	return {
-		...getDefaultEmbed(client),
-		...messages.topics.main(),
-	}
-}
+// const getTopicsMainEmbed = (client) => {
+// 	return {
+// 		...getDefaultEmbed(client),
+// 		...messages.topics.main(),
+// 	}
+// }
 
-const getVotingMainEmbed = (client, topics) => {
-	return {
-		...getDefaultEmbed(client),
-		...messages.voting.main(topics),
-	}
-}
+// const getVotingMainEmbed = (client, topics) => {
+// 	return {
+// 		...getDefaultEmbed(client),
+// 		...messages.voting.main(topics),
+// 	}
+// }
 
-const embeds = {
-	default: getDefaultEmbed,
-	settings: {
-		main: getSettingsMainEmbed,
-	},
-	topicsMain: getTopicsMainEmbed,
-	votingMain: getVotingMainEmbed
-}
+// const embed = {
+// 	default: getDefaultEmbed,
+	// settings: {
+	// 	main: getSettingsMainEmbed,
+	// },
+// 	topicsMain: getTopicsMainEmbed,
+// 	votingMain: getVotingMainEmbed
+// }
 
-export const getEmptyEphemeralReply = () => {
-	return {
-		content: undefined,
-		embeds: [],
-		ephemeral: true,
-		components: [],
-	};
-};
+// export const getEmptyEphemeralReply = () => {
+// 	return {
+// 		content: undefined,
+// 		embeds: [],
+// 		ephemeral: true,
+// 		components: [],
+// 	};
+// };
 
-export const getEphemeralReply = (content) => {
-	return {
-		content,
-		embeds: [],
-		ephemeral: true,
-		components: [],
-	};
-};
+// export const getEphemeralReply = (content) => {
+// 	return {
+// 		content,
+// 		embeds: [],
+// 		ephemeral: true,
+// 		components: [],
+// 	};
+// };
 
 
-const replies = {
-	ephemeralEmpty: getEmptyEphemeralReply,
-	ephemeral: getEphemeralReply,
-}
+// const reply = {
+// 	ephemeralEmpty: getEmptyEphemeralReply,
+// 	ephemeral: getEphemeralReply,
+// }
 
-export default {
-	embeds,
-	replies
-}
+// export default {
+// 	embed,
+// 	reply
+// }

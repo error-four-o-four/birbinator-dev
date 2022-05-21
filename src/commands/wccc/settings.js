@@ -5,15 +5,18 @@ import {
 	InteractionCollector
 } from 'discord.js';
 
-import controller from './assets/controller.js';
-import customIds from './assets/identifiers.js';
+import { customIds, labels } from './assets/identifiers.js';
+import settings from './controllers/settings.js';
+// import controller from './assets/controller.js';
+// import customIds from './assets/identifiers.js';
 
-import getElement from './assets/elements.js';
+import { getDefaultEmbed } from './assets/messages.js';
+// import { getDefaultEmbed } from './assets/elements.js';
+// import getElement from './assets/elements.js';
+// import getComponents from './assets/components.js';
+// import { settings as getMessage } from './assets/messages.js';
 
-import getComponents from './assets/components.js';
-import { settings as getMessage } from './assets/messages.js';
-
-import { createClickCollector, convertDuration } from '../../handlers/utils.js';
+import { createClickCollector } from '../../handlers/utils.js';
 
 /**
  *
@@ -23,8 +26,11 @@ import { createClickCollector, convertDuration } from '../../handlers/utils.js';
 export default async (client, interaction) => {
 	const clickCollector = createClickCollector(interaction);
 
-	const embed = getElement.embeds.settings.main(client);
-	const components = getComponents.settings.main();
+	const embed = getDefaultEmbed(client);
+	embed.title = '**These are your #WCCChallenge settings.**';
+	embed.description = settings.getDescription();
+
+	const components = settings.getMainComponents();
 
 	await interaction.reply({
 		embeds: [embed],
@@ -55,7 +61,8 @@ export default async (client, interaction) => {
 	clickCollector.on('end', async (collected, reason) => {
 		const message = `Ended settings configuration. ${(reason === 'time') ? 'Time has expired.' : 'By User.'}`;
 
-		controller.resetSelection();
+		// controller.resetSelection();
+		settings.reset();
 		if (reason === 'time' || reason === 'ended') {
 			interaction.editReply({
 				content: message,
@@ -80,41 +87,54 @@ const handleButton = async (interaction, collector, embed) => {
 
 	// Clicked 'exit' - emit end of interaction
 	if (customId === customIds.prompt[0]) {
-		controller.resetSelection();
+		// controller.resetSelection();
+		settings.reset();
 		collector.stop('ended');
 		return;
 	}
 
 	// Clicked 'back' - return to config menu
 	if (customId === customIds.prompt[1]) {
-		controller.resetSelection();
+		// controller.resetSelection();
+		settings.reset();
 		// embed.title = 'These are your WCCC Settings';
-		embed.description = controller.settingsDescription;
+		embed.description = settings.getMainDescription();
 		// embed = { ...embed, ...getMessage.main(controller.settings) };
-		components = getComponents.main();
+		// components = getComponents.main();
+		components = settings.getMainComponents();
 	}
 
 	// Clicked Submit
 	if (customId === customIds.prompt[3]) {
-		if (!controller.getSelectionValue()) {
+		// if (!controller.getSelectionValue()) {
+		if (!settings.getSelection()) {
 			embed.description = ':warning: No value selected!';
-			components = getComponents.edit(customId);
+			components = settings.getValueComponents(customId);
 		}
 		else {
-			controller.submitSelection();
-			controller.resetSelection();
-			// embed.title = 'These are your WCCC Settings';
-			embed.description = controller.settingsDescription;
+			settings.submit();
+			settings.reset();
+			embed.title = 'These are your WCCC Settings';
+			embed.description = settings.getMainDescription();
+			components = settings.getMainComponents();
+			// controller.submitSelection();
+			// controller.resetSelection();
+			// embed.description = controller.settingsDescription;
 			// embed = { ...embed, ...getMessage.main(controller.settings) };
-			components = getComponents.main();
+			// components = getComponents.main();
 		}
 	}
 
 	// Clicked config button - display editing menu
-	if (customIds.config.slice(0, 3).includes(customId)) {
-		controller.setSelectionId(customId);
-		embed.description = controller.settingsDescriptionValue;
-		components = getComponents.edit(customId);
+	if (customIds.config.includes(customId)) {
+		// controller.setSelectionId(customId);
+		settings.select(customId);
+		embed.title = labels[customId];
+		embed.description = 'Please choose a value from the menu.';
+		components = settings.getValueComponents(customId);
+		// embed.description = settings.getValueDescription()
+		// embed.description = controller.settingsDescriptionValue;
+		// components = getComponents.edit(customId);
 	}
 
 	await interaction.editReply({
@@ -133,6 +153,6 @@ const handleButton = async (interaction, collector, embed) => {
  * @param {array} components
  */
 const handleSelection = async (interaction, collector) => {
-	controller.setSelectionValue(interaction);
+	settings.setSelection(interaction.customId, interaction.values[0]);
 	collector.resetTimer();
 };

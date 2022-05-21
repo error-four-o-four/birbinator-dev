@@ -1,9 +1,37 @@
 // https://discord.js.org/#/docs/discord.js/main/class/Formatters?scrollTo=s-roleMention
 import { Formatters } from 'discord.js';
-import controller from './controller.js';
+import { convertDuration } from '../../../handlers/utils.js';
+// import controller from './controller.js';
 
 import { notifyId } from '../../../config.js';
 
+export const getDefaultEmbed = (client) => {
+	return {
+		type: 'rich',
+		thumbnail: {
+			url: client.user.avatarURL(),
+		}
+	};
+};
+
+export const getEmbed = (client, options = {}) => {
+	return {
+		type: 'rich',
+		thumbnail: {
+			url: client.user.avatarURL(),
+		},
+		...options,
+	};
+};
+
+export const getEphemeralReply = (content) => {
+	return {
+		content,
+		embeds: [],
+		ephemeral: true,
+		components: [],
+	};
+};
 
 export const getErrorMessage = (reason) => {
 	return (reason)
@@ -19,43 +47,72 @@ const topicsDescription = `Write \`topic myFancyTopicSuggestionName\` in this ch
 
 The bot will only acknowledge suggestions prefixed with topic and prompt you to confirm.`;
 
-const getTopicsMain = () => {
-	return {
-		title: topicsTitle,
-		description: topicsDescription,
-	};
-};
+// const getTopicsMain = () => {
+// 	return {
+// 		title: topicsTitle,
+// 		description: topicsDescription,
+// 	};
+// };
 
-const getTopicsUserPrompt = (reason) => {
-	return (reason === 'time')
-		? 'Time has expired. Please try again.'
-		: (reason === 'canceled')
-			? 'Mmmkay'
-			: 'Oh no. Something went wrong. Please try again.';
-};
+// const getTopicsUserPrompt = (reason) => {
+// 	return (reason === 'time')
+// 		? 'Time has expired. Please try again.'
+// 		: (reason === 'canceled')
+// 			? 'Mmmkay'
+// 			: 'Oh no. Something went wrong. Please try again.';
+// };
 
-const getTopicsCollected = (topics) => {
-	let content = '**Time is out!**\n';
-	content += (topics.length)
-	? 'Thank you for your suggestions!'
-	: 'Nobody suggested a topic. 🤨'
-	return content;
-}
+// const getTopicsCollected = (topics) => {
+// 	let content = '**Time is out!**\n';
+// 	content += (topics.length)
+// 		? 'Thank you for your suggestions!'
+// 		: 'Nobody suggested a topic. 🤨';
+// 	return content;
+// };
 
-const getTopicsCollectedNotification = (id, topics) => {
-	let content = `${Formatters.userMention(id)} **Topic Suggestion Time has ended!**\n`;
-	content += (topics.length)
-	? 'Please use `/wccc vote` to create and start the voting.'
-	: 'Unfortunately no one suggested a topic. Please use `/wccc topics` again.'
-	return content;
-}
+// const getTopicsCollectedNotification = (id, topics) => {
+// 	let content = `${Formatters.userMention(id)} **Topic Suggestion Time has ended!**\n`;
+// 	content += (topics.length)
+// 		? 'Please use `/wccc vote` to create and start the voting.'
+// 		: 'Unfortunately no one suggested a topic. Please use `/wccc topics` again.';
+// 	return content;
+// };
 
 export const topics = {
-	main: getTopicsMain,
-	userPrompt: getTopicsUserPrompt,
-	collected: getTopicsCollected,
-	notification: getTopicsCollectedNotification,
-}
+	title: topicsTitle,
+	description: topicsDescription,
+	// main: getTopicsMain,
+	// userPrompt: getTopicsUserPrompt,
+	userTopic(topic) {
+		return `Do you want to submit: **${topic}**`;
+	},
+	userPrompt(reason) {
+		return (reason === 'time')
+			? 'Time has expired. Please try again.'
+			: (reason === 'canceled')
+				? 'Mmmkay'
+				: 'Oh no. Something went wrong. Please try again.';
+	},
+	collected(topics) {
+		// let content = '**Time is out!**\n';
+		// content += (topics.length)
+		// ? 'Thank you for your suggestions!'
+		// : 'Nobody suggested a topic. 🤨'
+		// return content;
+		return `**Time is out!**\n${(topics.length)
+			? 'Thank you for your suggestions!'
+			: 'Nobody suggested a topic. 🤨'}`;
+	},
+	notification(userId, topics) {
+		let content = `${Formatters.userMention(userId)} **Topic Suggestion Time has ended!**\n`;
+		content += (topics.length)
+			? 'Please use `/wccc vote` to create and start the voting.'
+			: 'Unfortunately no one suggested a topic. Please use `/wccc topics` again.';
+		return content;
+	}
+	// collected: getTopicsCollected,
+	// notification: getTopicsCollectedNotification,
+};
 
 // export const topicTexts = {
 // 	onStart: getTopicsMain,
@@ -70,17 +127,27 @@ const votingTitle = `**Alright ${Formatters.roleMention(notifyId)} People! It's 
 
 const votingDescription = `These are the topics for the **#WCCChallenge**\n\n`;
 
-const getVotingMain = (topics) => {
-	return {
-		title: votingTitle,
-		description: votingDescription + topics.reduce((result, topic) => {
-			return result += topic.emoji + ' ' + topic.content + '\n';
-		}, ''),
-	}
-}
+// const getVotingMain = (topics) => {
+// 	return {
+// 		title: votingTitle,
+// 		description: votingDescription + topics.reduce((result, topic) => {
+// 			return result += topic.emoji + ' ' + topic.content + '\n';
+// 		}, ''),
+// 	};
+// };
 export const voting = {
-	main: getVotingMain
-}
+	title: votingTitle,
+	description: votingDescription,
+	draw(duration) {
+		return `**It's a draw!**\nYou have another ${convertDuration(duration)} to vote a winner.`
+	},
+	ended(topic) {
+		return `**Looks like we have a winner!**\nThe topic of this week is:\n${topic.emoji} **${topic.content}**\nwith ${topic.votes} votes.`;
+		// embed.description = `The topic of this week is:\n${winner.emoji} **${winner.content}**\nwith ${winner.votes} votes.`;
+
+	},
+	// main: getVotingMain
+};
 
 ///////////////////////////////////////////////////////////////////// faq command
 
@@ -125,20 +192,20 @@ There you go: [#WCCChallenge Topics Notion](<https://sableraph.notion.site/afe97
 
 ///////////////////////////////////////////////////////////////////// settings.js
 
-const getSettingsMain = () => {
-	return {
-		title: 'These are your WCCC Settings',
-		description: 'What do you want do change?\n\n' + controller.settingsDescription,
-	}
-}
+// const getSettingsMain = () => {
+// 	return {
+// 		title: 'These are your WCCC Settings',
+// 		description: 'What do you want do change?\n\n' + controller.settingsDescription,
+// 	}
+// }
 
-/** @todo */
-const getSettingsEditing = (customId) => {
-	return {
-		title: labels[customId],
-		description: 'Please choose a value.',
-	};
-};
+// /** @todo */
+// const getSettingsEditing = (customId) => {
+// 	return {
+// 		title: labels[customId],
+// 		description: 'Please choose a value.',
+// 	};
+// };
 // const getEditingText = (customId) => {
 // 	let text = `Please submit a new value `;
 // 	text += (customId === customIds[1])
@@ -147,14 +214,14 @@ const getSettingsEditing = (customId) => {
 // 	return text;
 // };
 
-export const settings = {
-	main: getSettingsMain,
-	edit: getSettingsEditing,
+// export const settings = {
+// 	main: getSettingsMain,
+// 	edit: getSettingsEditing,
 
-}
+// }
 
 export default {
-	settings,
+	// settings,
 	topics,
 	voting,
 	faqMessageContent,

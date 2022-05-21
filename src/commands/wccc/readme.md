@@ -11,40 +11,65 @@ find errors/bugs<br>
 
 # structure
 
-## assets
+## controllers
 
+### settings.js
+*imports*<br>
+customIds, labels, components
+
+*exports default*
+
+*keeps track of*<br>
+settings menu selection<br>
+settings values (maximum amount of suggested topics; suggestion and voting duration;)<br>
+
+### voting.js
+*imports*<br>
+customIds, messages, settings controller (to get values)
+
+*exports default*
+
+*functions*<br>
+wccc state (topic/voting time)<br>
+collectors<br>
+topics<br>
+
+## assets
+<!--
 ### controller.js
 *imports* customIds<br>
 *exports default*
 
-keeps track of:
-- settings menu selection
-- settings values (maximum amount of suggested topics; suggestion and voting duration;)
-- wccc state (topic/voting time)
-- collectors
-- topics
-
 ### elements.js
 *imports* customIds, settings, messages<br>
-*exports* interaction embdes and components
+*exports* interaction embdes and components -->
 
 ### identifiers.js
-*exports default* identifier for interaction components (buttons, select menu etc.)
+*exports*<br>
+identifier for interaction components (buttons, select menu etc.)<br>
+labels<br>
+
+### components.js
+*imports*<br>
+customIds, labels
+
+*exports*<br>
+components, getPromptComponents
 
 ### messages.js
-*exports* all message contents, titles, descriptions, labels etc.
-
+*exports*<br>
+embeds, all message contents, titles, descriptions etc.
 
 ## commands
-
-### config.js
-handles '/wccc config' slashcommand to configurate settings of the voting.
 
 ### guide.js
 shows a message embed with wccc guidelines
 
 ### past.js
 sends a link to the past topics on notion
+
+### settings.js
+handles '/wccc settings' slashcommand to configurate settings of the voting.
 
 ### topics.js
 starts the topic suggestion time.<br>

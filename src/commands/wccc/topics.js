@@ -8,12 +8,17 @@ import {
 import { createPromptCollector } from '../../handlers/utils.js';
 
 import presences from '../../handlers/presences.js';
-import controller from './assets/controller.js';
+// import controller from './assets/controller.js';
+import voting from './controllers/voting.js';
 
-import getElement from './assets/elements.js';
-import getComponent from './assets/components.js';
+// import getElement from './assets/elements.js';
+// import getComponent from './assets/components.js';
 
-import { topics as getMessage } from './assets/messages.js';
+import { getPromptComponents } from './assets/components.js'
+import { getEphemeralReply } from './assets/messages.js';
+
+import { topics as messages } from './assets/messages.js';
+// import { topics as getMessage } from './assets/messages.js';
 
 /**
  * @param {Client} client
@@ -21,13 +26,13 @@ import { topics as getMessage } from './assets/messages.js';
  */
 export default async (client, interaction) => {
 	// check state
-	if (!controller.checkState(interaction)) return;
+	if (!voting.checkState(interaction)) return;
 
 	// make collector accessible
-	controller.startCollectingTopics(interaction);
+	voting.startCollectingTopics(interaction.channel);
 
 	// show default message
-	const embed = getElement.embeds.topicsMain(client);
+	const embed = voting.getTopicsEmbed(client);
 	// const embed = {
 	// 	...getElement.embeds.default(client),
 	// 	...getMessage.main(),
@@ -41,8 +46,8 @@ export default async (client, interaction) => {
 	client.user.setPresence(presences.getTopicTime());
 
 	// await events
-	controller.topicCollector.on('collect', collectTopic);
-	controller.topicCollector.on('end', evaluateTopics.bind(null, client, interaction));
+	voting.topicCollector.on('collect', collectTopic);
+	voting.topicCollector.on('end', evaluateTopics.bind(null, client, interaction));
 };
 
 /**
@@ -51,19 +56,20 @@ export default async (client, interaction) => {
  * @returns
  */
 const collectTopic = async (message) => {
-	const topic = controller.validateTopic(message.content);
-	const reply = getElement.replies.ephemeral();
+	const topic = voting.validateTopic(message.content);
+	const reply = getEphemeralReply();
 
 	if (!topic) {
-		reply.content = getMessage.userPrompt();
+		reply.content = messages.userPrompt();
 		message.reply(reply);
 		return;
 	}
 
 	// listen for incoming messages
 	const promptCollector = createPromptCollector(message);
-	reply.content = `Do you want to submit: **${topic}**`;
-	reply.components = getComponent.prompt();
+	reply.content = messages.userTopic(topic);
+	reply.components = getPromptComponents();
+	// reply.components = getComponent.prompt();
 
 	// assign sent message to edit it afterwards
 	const sent = await message.reply(reply);
@@ -72,7 +78,9 @@ const collectTopic = async (message) => {
 	promptCollector.on('end', async (collected, reason) => {
 
 		if (reason === 'time' || collected.first().customId === 'prompt_cancel') {
-			reply.content = (reason === 'time') ? getMessage.userPrompt(reason) : getMessage.userPrompt('canceled');
+			reason = (reason === 'time') ? reason : 'canceled';
+			reply.content = message.userPrompt(reason);
+			// reply.content = (reason === 'time') ? getMessage.userPrompt(reason) : getMessage.userPrompt('canceled');
 			reply.components = [];
 			await sent.edit(reply);
 			return;
@@ -82,7 +90,7 @@ const collectTopic = async (message) => {
 		// controller checks amount of collected topics
 		// and stops the collector
 		if (collected.first().customId === 'prompt_confirm') {
-			controller.submitTopic(topic, message.author);
+			voting.submitTopic(topic, message.author);
 			message.react('✅');
 		}
 
@@ -92,17 +100,17 @@ const collectTopic = async (message) => {
 
 const evaluateTopics = async (client, interaction) => {
 	// update controller
-	controller.stopCollectingTopics();
+	voting.stopCollectingTopics();
 
 	// notify users
 	await interaction.channel.send({
-		content: getMessage.collected(controller.topics),
+		content: messages.collected(voting.topics),
 	});
 
 	// notify 'moderator'
 	/** @todo notification role? */
 	await interaction.followUp({
-		content: getMessage.notification(interaction.user.id, controller.topics),
+		content: messages.notification(interaction.user.id, voting.topics),
 		ephemeral: true
 	});
 

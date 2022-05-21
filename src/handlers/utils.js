@@ -60,11 +60,12 @@ export const createClickCollector = (interaction, time = 20000, max = 50) => {
  * @param {Message} message
  * @returns {InteractionCollector} Collector
  */
-export const createPromptCollector = (message) => {
+export const createPromptCollector = (message, time = 5000, max = 1) => {
+	/** @todo isDMChannel ?  */
 	return message.channel.createMessageComponentCollector({
 		componentType: Constants.MessageComponentTypes.BUTTON,
 		filter: (btnInteraction) => btnInteraction.user.id === message.author.id,
-		time: 1000 * 5,
-		max: 1
+		time,
+		max
 	});
 };
