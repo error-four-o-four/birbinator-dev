@@ -1,8 +1,7 @@
 import { Client, Interaction } from 'discord.js';
 import presences from '../../handlers/presences.js';
 import voting from './controllers/voting.js';
-// import controller from './assets/controller.js';
-import { getEphemeralReply } from './assets/elements.js';
+import { getEphemeralReply } from './assets/messages.js';
 
 /**
  * @param {Client} client

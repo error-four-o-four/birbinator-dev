@@ -8,17 +8,12 @@ import {
 import { createPromptCollector } from '../../handlers/utils.js';
 
 import presences from '../../handlers/presences.js';
-// import controller from './assets/controller.js';
 import voting from './controllers/voting.js';
-
-// import getElement from './assets/elements.js';
-// import getComponent from './assets/components.js';
 
 import { getPromptComponents } from './assets/components.js'
 import { getEphemeralReply } from './assets/messages.js';
 
 import { topics as messages } from './assets/messages.js';
-// import { topics as getMessage } from './assets/messages.js';
 
 /**
  * @param {Client} client
@@ -33,10 +28,6 @@ export default async (client, interaction) => {
 
 	// show default message
 	const embed = voting.getTopicsEmbed(client);
-	// const embed = {
-	// 	...getElement.embeds.default(client),
-	// 	...getMessage.main(),
-	// };
 
 	await interaction.reply({
 		embeds: [embed]
@@ -69,7 +60,6 @@ const collectTopic = async (message) => {
 	const promptCollector = createPromptCollector(message);
 	reply.content = messages.userTopic(topic);
 	reply.components = getPromptComponents();
-	// reply.components = getComponent.prompt();
 
 	// assign sent message to edit it afterwards
 	const sent = await message.reply(reply);
@@ -80,7 +70,6 @@ const collectTopic = async (message) => {
 		if (reason === 'time' || collected.first().customId === 'prompt_cancel') {
 			reason = (reason === 'time') ? reason : 'canceled';
 			reply.content = message.userPrompt(reason);
-			// reply.content = (reason === 'time') ? getMessage.userPrompt(reason) : getMessage.userPrompt('canceled');
 			reply.components = [];
 			await sent.edit(reply);
 			return;
@@ -108,7 +97,6 @@ const evaluateTopics = async (client, interaction) => {
 	});
 
 	// notify 'moderator'
-	/** @todo notification role? */
 	await interaction.followUp({
 		content: messages.notification(interaction.user.id, voting.topics),
 		ephemeral: true

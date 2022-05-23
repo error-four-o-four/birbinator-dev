@@ -5,19 +5,18 @@ import { components } from '../assets/components.js';
 
 // the #wccc settings
 const values = {
-	[customIds.config[0]]: 1000 * 60,
-	// [customIds.config[0]]: 1000 * 60 * 10, // millis / default: 10 minutes
+	[customIds.config[0]]: 1000 * 60 * 5,
 	[customIds.config[1]]: 5,
-	[customIds.config[2]]: 1000 * 60,
+	[customIds.config[2]]: 1000 * 60 * 5,
 	amounts: [
 		2, 5, 10, 20
 	],
 	durations: [
 		60, 300, 600, 1800, 3600, 7200, 43200, 86400
 	].map((v) => v *= 1000), // convert sec to ms
-	timeouts: [
-		120, 300, // delta!
-	],
+	// timeouts: [
+	// 	120, 300, // delta!
+	// ],
 };
 
 // keep track of the selected values -> /wccc settings
@@ -73,21 +72,21 @@ const getMainComponents = () => {
 // };
 
 const getValueComponents = (customId) => {
-	const getAmountOptions = () => settings.amounts.map((amount) => {
+	const getAmountOptions = () => values.amounts.map((amount) => {
 		return {
 			value: '' + amount,
 			label: amount + ' topics',
 		};
 	});
-	const getDurationOptions = () => settings.durations.map((millis) => {
+	const getDurationOptions = () => values.durations.map((millis) => {
 		return {
 			value: '' + millis,
 			label: convertDuration(millis),
 		};
 	});
 	const component = (customId === customIds.config[1])
-		? components.config[customIds.config[1]]
-		: components.config[customIds.config[0]];
+		? components.select[customIds.select[1]]
+		: components.select[customIds.select[0]];
 
 	component.options = (customId === customIds.config[1])
 		? getAmountOptions()

@@ -8,6 +8,8 @@ import commands from './handlers/commands.js';
 import presences from './handlers/presences.js';
 import { logger } from './handlers/utils.js';
 
+import { getErrorReply } from './commands/wccc/assets/messages.js';
+
 const client = new Client({ intents: config.intents });
 
 /**
@@ -54,7 +56,7 @@ const onInteractionCreate = async (client, interaction) => {
 			await command.execute(client, interaction);
 		} catch (error) {
 			console.error(error);
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+			await interaction.reply(getErrorReply());
 		}
 	};
 };

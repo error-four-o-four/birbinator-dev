@@ -1,18 +1,9 @@
 // https://discord.js.org/#/docs/discord.js/main/class/Formatters?scrollTo=s-roleMention
 import { Formatters } from 'discord.js';
 import { convertDuration } from '../../../handlers/utils.js';
-// import controller from './controller.js';
+import { channelIds, roleIds } from '../../../config.js';
 
-import { notifyId } from '../../../config.js';
-
-export const getDefaultEmbed = (client) => {
-	return {
-		type: 'rich',
-		thumbnail: {
-			url: client.user.avatarURL(),
-		}
-	};
-};
+const notification = Formatters.roleMention(roleIds.notification);
 
 export const getEmbed = (client, options = {}) => {
 	return {
@@ -33,56 +24,36 @@ export const getEphemeralReply = (content) => {
 	};
 };
 
-export const getErrorMessage = (reason) => {
-	return (reason)
-		? reason
-		: 'Oh no. Something went wrong. Please try again.';
+export const getPermissionReply = () => {
+	return {
+		content: 'Sorry. You\'re not allowed to use this command.',
+		ephemeral: true,
+	};
+};
+
+export const getErrorReply = (reason) => {
+	return {
+		content: `Oh no. Something went wrong. Please try again.${(reason) ? ' Reason: ' + reason : ''}`,
+		ephemeral: true,
+	};
 };
 
 ///////////////////////////////////////////////////////////////////// topics.js
+// controllers/votings.js
+// getTopicsEmbed() - settings + description
 
-const topicsTitle = `**Alright ${Formatters.roleMention(notifyId)} People! It's Topic Suggestion Time**`;
+const topicsTitle = `**Alright ${notification} People! It's Topic Suggestion Time**`;
 
-const topicsDescription = `Write \`topic myFancyTopicSuggestionName\` in this channel to suggest your Topic. Make sure to write additional content of your suggestion in a seperate message.
+const topicsDescription = `Write \`topic myFancyTopicSuggestion\` in this channel to suggest your Topic. Make sure to write additional content of your suggestion in a seperate message.
 
-The bot will only acknowledge suggestions prefixed with topic and prompt you to confirm.`;
-
-// const getTopicsMain = () => {
-// 	return {
-// 		title: topicsTitle,
-// 		description: topicsDescription,
-// 	};
-// };
-
-// const getTopicsUserPrompt = (reason) => {
-// 	return (reason === 'time')
-// 		? 'Time has expired. Please try again.'
-// 		: (reason === 'canceled')
-// 			? 'Mmmkay'
-// 			: 'Oh no. Something went wrong. Please try again.';
-// };
-
-// const getTopicsCollected = (topics) => {
-// 	let content = '**Time is out!**\n';
-// 	content += (topics.length)
-// 		? 'Thank you for your suggestions!'
-// 		: 'Nobody suggested a topic. 🤨';
-// 	return content;
-// };
-
-// const getTopicsCollectedNotification = (id, topics) => {
-// 	let content = `${Formatters.userMention(id)} **Topic Suggestion Time has ended!**\n`;
-// 	content += (topics.length)
-// 		? 'Please use `/wccc vote` to create and start the voting.'
-// 		: 'Unfortunately no one suggested a topic. Please use `/wccc topics` again.';
-// 	return content;
-// };
+The bot will only acknowledge suggestions prefixed with \`topic\` and prompt you to confirm.`;
 
 export const topics = {
 	title: topicsTitle,
 	description: topicsDescription,
-	// main: getTopicsMain,
-	// userPrompt: getTopicsUserPrompt,
+	settings(delta, maximum) {
+		return `You have ${convertDuration(delta)} to suggest a maximum of ${maximum} topics!\n\n`;
+	},
 	userTopic(topic) {
 		return `Do you want to submit: **${topic}**`;
 	},
@@ -94,59 +65,60 @@ export const topics = {
 				: 'Oh no. Something went wrong. Please try again.';
 	},
 	collected(topics) {
-		// let content = '**Time is out!**\n';
-		// content += (topics.length)
-		// ? 'Thank you for your suggestions!'
-		// : 'Nobody suggested a topic. 🤨'
-		// return content;
 		return `**Time is out!**\n${(topics.length)
 			? 'Thank you for your suggestions!'
 			: 'Nobody suggested a topic. 🤨'}`;
 	},
 	notification(userId, topics) {
-		let content = `${Formatters.userMention(userId)} **Topic Suggestion Time has ended!**\n`;
-		content += (topics.length)
+		return `${Formatters.userMention(userId)} **Topic Suggestion Time has ended!**\n${(topics.length)
 			? 'Please use `/wccc vote` to create and start the voting.'
-			: 'Unfortunately no one suggested a topic. Please use `/wccc topics` again.';
-		return content;
+			: 'Unfortunately no one suggested a topic. Please use `/wccc topics` again.'}`;
+	},
+	time(date) {
+		// const delta = Formatters.time(timestamp, 'R');
+		const delta = ~~((date.getTime() - Date.now()) / 1000) * 1000;
+		return `The Topic Suggestion Time will end in ${convertDuration(delta)}.`;
 	}
-	// collected: getTopicsCollected,
-	// notification: getTopicsCollectedNotification,
 };
 
-// export const topicTexts = {
-// 	onStart: getTopicsMain,
-// 	onPrompt: getTopicsUserPrompt,
-// 	onEnd: getTopicsCollected,
-// 	onEndNotification: getTopicsCollectedNotification
-// }
-
 ///////////////////////////////////////////////////////////////////// vote.js
+// controllers/votings.js
+// getVotingEmbed() - description + list + settings
 
-const votingTitle = `**Alright ${Formatters.roleMention(notifyId)} People! It's Time to vote the topic of this weeks challenge!**`;
+const votingTitle = `**Alright ${notification} People!**`;
 
-const votingDescription = `These are the topics for the **#WCCChallenge**\n\n`;
+const votingDescription = `It's Time to vote the topic of this weeks challenge!\n\n`;
 
-// const getVotingMain = (topics) => {
-// 	return {
-// 		title: votingTitle,
-// 		description: votingDescription + topics.reduce((result, topic) => {
-// 			return result += topic.emoji + ' ' + topic.content + '\n';
-// 		}, ''),
-// 	};
-// };
 export const voting = {
 	title: votingTitle,
 	description: votingDescription,
-	draw(duration) {
-		return `**It's a draw!**\nYou have another ${convertDuration(duration)} to vote a winner.`
+	settings(delta) {
+		return `\nThe voting ends in **${convertDuration(delta)}**.`;
+	},
+	draw(delta) {
+		return `**It's a draw!**\nYou have another **${convertDuration(delta)}** to vote a winner.`;
 	},
 	ended(topic) {
-		return `**Looks like we have a winner!**\nThe topic of this week is:\n${topic.emoji} **${topic.content}**\nwith ${topic.votes} votes.`;
-		// embed.description = `The topic of this week is:\n${winner.emoji} **${winner.content}**\nwith ${winner.votes} votes.`;
-
+		return `**Looks like we have a winner!**\nThe topic of this week is: ${topic.emoji} **${topic.content}**`;
 	},
-	// main: getVotingMain
+	time(date) {
+		// show voting time
+		if (date) {
+			const delta = ~~((date.getTime() - Date.now()) / 1000) * 1000;
+			return `The Voting Time will end in **${convertDuration(delta)}**.`;
+		}
+
+		// show challenge review time
+		const next = new Date();
+		next.setUTCDate(next.getUTCDate() + (7 - next.getUTCDay()));
+		next.setUTCHours(15, 0, 0, 0);
+
+		const delta = ~~((next.getTime() - Date.now()) / 1000) * 1000;
+
+		return `Your challenge submissions will be reviewed **${(delta > 86400000)
+			? 'on ' + next.toLocaleDateString(undefined, {dateStyle: 'full'})
+			: 'in ' + convertDuration(delta)}**.`;
+	}
 };
 
 ///////////////////////////////////////////////////////////////////// faq command
@@ -156,7 +128,7 @@ const faqMessageContent = `The Weekly Creative Code Challenge **#WCCChallenge** 
 ///////////////////////////////////////////////////////////////////// guide.js
 
 const guideTitle = '**Here are some guidelines for participating in the #WCCChallenge**';
-const guideDescription = `- Post your creation in ${Formatters.channelMention('969317896432009216')}.
+const guideDescription = `- Post your creation in ${Formatters.channelMention(channelIds.submissions)}.
 
 - You are free to (mis)interpret the topic of the week any way that you like
 
@@ -192,36 +164,7 @@ There you go: [#WCCChallenge Topics Notion](<https://sableraph.notion.site/afe97
 
 ///////////////////////////////////////////////////////////////////// settings.js
 
-// const getSettingsMain = () => {
-// 	return {
-// 		title: 'These are your WCCC Settings',
-// 		description: 'What do you want do change?\n\n' + controller.settingsDescription,
-// 	}
-// }
-
-// /** @todo */
-// const getSettingsEditing = (customId) => {
-// 	return {
-// 		title: labels[customId],
-// 		description: 'Please choose a value.',
-// 	};
-// };
-// const getEditingText = (customId) => {
-// 	let text = `Please submit a new value `;
-// 	text += (customId === customIds[1])
-// 		? `<number>.`
-// 		: `<number><string:h/m/s> (e.g. \`2 hours\`, \`12min\`, \`30 s\`)`;
-// 	return text;
-// };
-
-// export const settings = {
-// 	main: getSettingsMain,
-// 	edit: getSettingsEditing,
-
-// }
-
 export default {
-	// settings,
 	topics,
 	voting,
 	faqMessageContent,

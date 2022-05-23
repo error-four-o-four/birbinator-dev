@@ -1,19 +1,12 @@
-import {
-	Client,
-	Interaction
-} from 'discord.js';
-// import controller from './assets/controller.js';
-import { createPromptCollector } from '../../handlers/utils.js';
+import { Constants, Client, Interaction, Collection } from 'discord.js';
 import { getPromptComponents } from './assets/components.js';
+
 import presences from '../../handlers/presences.js';
 import settings from './controllers/settings.js';
 import voting from './controllers/voting.js';
 import { customIds } from './assets/identifiers.js';
 import { voting as messages } from './assets/messages.js';
 
-// import { getEmbed } from './assets/messages.js';
-// import getElement from './assets/elements.js';
-// import { evaluateTopicEmojis, hasEmojiDuplicates } from './assets/utils.js';
 
 /**
  * @param {Client} client
@@ -31,6 +24,7 @@ export default async (client, interaction) => {
 	// bc ephemeral messages don't allow emoji reactions :(
 	const created = await sendDirectMessages(interaction.user);
 
+	// cancel if necessary
 	if (!created) {
 		await sent.delete();
 		return;
@@ -38,7 +32,6 @@ export default async (client, interaction) => {
 
 	// notify users to give their votes
 	const embed = voting.getVotingEmbed(client);
-	// const embed = getElement.embeds.votingMain(client, controller.topics);
 
 	// notify users to vote a topic
 	await interaction.editReply({
@@ -55,38 +48,37 @@ export default async (client, interaction) => {
 };
 
 const evaluateVotes = async (client, interaction, collected) => {
-	const emojis = voting.topics.map((t) => t.emoji);
-	const filter = (c) => emojis.includes(c.emoji.toString());
-	const sorter = (a, b) => b.count - a.count;
-	const sorted = collected.filter(filter).sort(sorter);
-	const count = sorted.first().count;
-	const isDraw = sorted.filter((c) => c.count === count).size > 1;
+	const filterCollected = (c) => voting.emojis.includes(c.emoji.toString());
+	const sortCollected = (a, b) => b.count - a.count;
 
-	// const embed = getEmbed(client);
+	const sorted = collected.filter(filterCollected).sort(sortCollected);
+	const final = sorted.filter((c) => c.count === sorted.first().count);
 
-	if (isDraw) {
-		// embed.title = '**It\'s a draw!**';
-		// embed.description = `You have another ${controller.settings[customIds.config[2]]} to vote a winner.`;
+	if (final.size > 1) {
+		// it's a draw
 		const sent = await interaction.followUp({
 			content: messages.draw(settings.getValue(customIds.config[2]))
-			// embeds: [embed]
 		});
-		/** @error .map is not a function */
-		const finalEmojis = sorted.values().map((s) => s.emoji.toString())
+		const finalEmojis = final.reduce((r, c) => [...r, c.emoji.toString()], []);
 		const finalTopics = voting.topics.filter((t) => finalEmojis.includes(t.emoji));
+
+		voting.stopCollectingVotes();
 		voting.startCollectingVotes(sent, finalTopics);
+
 		return;
 	}
 
-	// const
-	const winner = voting.topics.filter((t) => t.emoji === sorted.first().emoji.toString());
-	// embed.title = '**Looks like we have a winner!**';
-	// embed.description = `The topic of this week is:\n${winner.emoji} **${winner.content}**\nwith ${winner.votes} votes.`;
+	// add counts
+	sorted.forEach((c) =>	voting.topics.filter((t) => t.emoji === c.emoji.toString())[0].votes = c.count);
+
+	const winner = voting.topics.filter((t) => t.emoji === final.first().emoji.toString())[0];
 
 	await interaction.followUp({
-		content: messages.ended(winner)
-		// embeds: [embed]
+		content: messages.ended(winner),
 	});
+
+	// create notion page and clear topics
+	voting.stopCollectingVotes(winner);
 
 	// update bot info
 	client.user.setPresence(presences.getDefault(client));
@@ -120,7 +112,7 @@ const sendDirectMessages = async (user) => {
 
 				// check duplicates
 				if (voting.checkReactionDuplicates()) {
-					await directMessage.edit('**There are duplicates**.\nPlease use different emojis.');
+					await directMessage.edit('**There are duplicates**. Please use different emojis.');
 					return;
 				}
 
@@ -147,29 +139,34 @@ const sendDirectMessages = async (user) => {
 
 const sendPrompt = async (directMessage, user) => {
 	return new Promise(async (resolve) => {
-		const reply = {
+		// collect prompt button interaction
+		const promptCollector = directMessage.channel.createMessageComponentCollector({
+			componentType: Constants.MessageComponentTypes.BUTTON,
+			time: 1000 * 30,
+			max: 1
+		});
+
+		// send and fetch preview message with prompt buttons to delete afterwards
+		const sent = await user.send({
 			content: `**Preview**\n${voting.getTopicsList()}\n**Do you want to start the voting??**`,
 			components: getPromptComponents(),
-		};
-		const promptCollector = createPromptCollector(directMessage, 1000 * 30)
-		// const promptCollector = directMessage.channel.createMessageComponentCollector({
-		// 	componentType: Constants.MessageComponentTypes.BUTTON,
-		// 	time: 1000 * 30,
-		// 	max: 1
-		// });
+		});
 
-		const sent = await user.send(reply);
-		let created = false;
-
+		// reset timer after the message has been sent
 		promptCollector.resetTimer();
+
+		// check clicked button
 		promptCollector.on('end', async (collected) => {
-			if (collected.size > 0 && collected.first().customId === 'prompt_confirm') created = true;
+			const created = (collected.size > 0 && collected.first().customId === customIds.prompt[3]);
+
+			// clicked cancel or time is over
+			if (!created) voting.resetReactions();
+
+			// delete preview message
 			await sent.delete();
+
+			// resolve promise
 			resolve(created);
 		});
 	});
 };
-
-// const getPreviewContent = () => {
-// 	return `**Preview**\n${voting.getTopicsList()}\n**Do you want to start the voting??**`;
-// };

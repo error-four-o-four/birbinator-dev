@@ -5,9 +5,21 @@ config();
 export const BOT_TOKEN = process.env.BOT_TOKEN;
 
 // ### BOT CONFIG
-export const botId = process.env.BOT_ID;
+export const botId = '969310807076790312';
 export const guildId = process.env.GUILD_ID;
-export const notifyId = process.env.NOTIFY_ID;
+export const notifyId = '974624963682263050';
+export const moderatorId = '977873249440526376';
+
+export const roleIds = {
+	moderator: '977873249440526376',
+	notification: '974624963682263050',
+}
+
+export const channelIds = {
+	chat: '963542829685158018',
+	submissions: '896810496618020905',
+	voting: '969317896432009216',
+}
 
 // ### intents calculator https://ziad87.net/intents/
 // intents: [
@@ -23,17 +35,27 @@ export const notifyId = process.env.NOTIFY_ID;
 // ]
 export const intents = 46859;
 
-export const owners = [
-	{
-		id: process.env.OWNER_ID,
+export const notion = {
+	dbId: '715cb2bf2c89445a83a836063bf2144c',
+	dbKey: process.env.NOTION_DB_TOKEN,
+	ids: {
+		topic: 'title',
+		emoji: '%5Es_g',
+		notes: 'EKSm',
+		stream_date: '%3DaeV',
+		suggested_by: 'Ez%3D%40',
+		suggested_topics: 'soBr',
 	}
-]
+}
 
 export default {
 	BOT_TOKEN,
 	botId,
 	guildId,
 	notifyId,
-	owners,
+	moderatorId,
+	roleIds,
+	channelIds,
 	intents,
+	notion,
 }

@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/bot.js",
-    "deploy": "node src/deploy.js"
+    "deploy": "node src/deploy.js",
+    "notion": "nodemon src/commands/wccc/controllers/notion.js"
   },
   "keywords": [
     "discord",
@@ -20,6 +21,7 @@
   "dependencies": {
     "@discordjs/builders": "^0.13.0",
     "@discordjs/rest": "^0.4.1",
+    "@notionhq/client": "^1.0.4",
     "discord-api-types": "^0.31.2",
     "discord.js": "^13.6.0",
     "dotenv": "^16.0.0"
