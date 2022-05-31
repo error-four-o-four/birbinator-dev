@@ -1,9 +1,5 @@
 import { Constants } from 'discord.js';
-// import { convertDuration } from '../../../handlers/utils.js';
-
 import { customIds, labels } from './identifiers.js';
-
-// import settings from '../controllers/settings.js';
 
 export const components = {
 	config: {
@@ -78,56 +74,6 @@ export const components = {
 		},
 	}
 };
-
-// export const getSettingsMainComponents = () => {
-// 	return [{
-// 		type: Constants.MessageComponentTypes.ACTION_ROW,
-// 		components: [
-// 			components.prompt[customIds.prompt[0]], // Exit
-// 			components.config[customIds.config[0]],
-// 			components.config[customIds.config[1]],
-// 			components.config[customIds.config[2]],
-// 		],
-// 	}];
-// };
-
-// export const getSettingsEditingCompnents = (customId) => {
-// 	const getAmountOptions = () => settings.amounts.map((amount) => {
-// 		return {
-// 			value: '' + amount,
-// 			label: amount + ' topics',
-// 		};
-// 	})
-// 	const getDurationOptions = () => settings.durations.map((millis) => {
-// 		return {
-// 			value: '' + millis,
-// 			label: convertDuration(millis),
-// 		};
-// 	})
-// 	const component = (customId === customIds.config[1])
-// 		? components.config[customIds.config[1]]
-// 		: components.config[customIds.config[0]];
-
-// 	component.options = (customId === customIds.config[1])
-// 		? getAmountOptions()
-// 		: getDurationOptions();
-
-// 	return [
-// 		{
-// 			type: Constants.MessageComponentTypes.ACTION_ROW,
-// 			components: [
-// 				component,
-// 			],
-// 		},
-// 		{
-// 			type: Constants.MessageComponentTypes.ACTION_ROW,
-// 			components: [
-// 				components.prompt[customIds.prompt[1]], // Back
-// 				components.prompt[customIds.prompt[3]], // Confirm
-// 			],
-// 		},
-// 	];
-// };
 
 /////////////////////////////////////////////////////////////////////////////
 

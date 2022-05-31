@@ -1,11 +1,7 @@
-import { Client, Interaction } from 'discord.js';
 import texts from './assets/messages.js';
 
-/**
- *
- * @param {Client} client
- * @param {Interaction} interaction
- */
+export const description = `Sends a link to the past topics.`;
+
 export default (client, interaction) => {
 		interaction.reply({
 			content: texts.pastMessageContent,

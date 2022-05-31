@@ -1,22 +1,14 @@
+import fs from 'fs';
 import { ButtonInteraction, Constants, InteractionCollector, Message } from 'discord.js';
 
-
-// https://gist.github.com/abritinthebay/d80eb99b2726c83feb0d97eab95206c4
-export const logger = {
-	red: '\x1b[31m%s\x1b[0m',
-	green: '\x1b[32m%s\x1b[0m',
-	yellow: '\x1b[33m%s\x1b[0m',
-	blue: '\x1b[34m%s\x1b[0m',
-	magenta: '\x1b[35m%s\x1b[0m',
-	cyan: '\x1b[36m%s\x1b[0m',
-	white: '\x1b[37m%s\x1b[0m',
-	time: () => {
-		const d = new Date();
-		return `[${d.toTimeString().slice(0, 8)}]`;
-		// return `[${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}]`;
-	},
+/**
+ * read directory content
+ * @param {String} path
+ * @returns file names
+ */
+export const getFiles = async (path) => {
+	return fs.readdirSync(path).filter((file) => file.endsWith('.js'));
 };
-
 
 /**
  * Convert string <1min> to milliseconds. Ty @nking :D
@@ -60,7 +52,7 @@ export const createClickCollector = (interaction, time = 20000, max = 50) => {
  * @param {Message} message
  * @returns {InteractionCollector} Collector
  */
-export const createPromptCollector = (message, time = 5000, max = 1) => {
+export const createPromptCollector = (message, time = 10000, max = 1) => {
 	/** @todo isDMChannel ?  */
 	return message.channel.createMessageComponentCollector({
 		componentType: Constants.MessageComponentTypes.BUTTON,
@@ -68,4 +60,19 @@ export const createPromptCollector = (message, time = 5000, max = 1) => {
 		time,
 		max
 	});
+};
+
+// https://gist.github.com/abritinthebay/d80eb99b2726c83feb0d97eab95206c4
+export const logger = {
+	red: '\x1b[31m%s\x1b[0m',
+	green: '\x1b[32m%s\x1b[0m',
+	yellow: '\x1b[33m%s\x1b[0m',
+	blue: '\x1b[34m%s\x1b[0m',
+	magenta: '\x1b[35m%s\x1b[0m',
+	cyan: '\x1b[36m%s\x1b[0m',
+	white: '\x1b[37m%s\x1b[0m',
+	time: () => {
+		const d = new Date();
+		return `[${d.toTimeString().slice(0, 8)}]`;
+	},
 };

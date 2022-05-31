@@ -1,6 +1,6 @@
 // https://discord.js.org/#/docs/discord.js/main/class/Formatters?scrollTo=s-roleMention
 import { Formatters } from 'discord.js';
-import { convertDuration } from '../../../handlers/utils.js';
+import { convertDuration } from '../../../functions/utils.js';
 import { channelIds, roleIds } from '../../../config.js';
 
 const notification = Formatters.roleMention(roleIds.notification);
@@ -75,7 +75,6 @@ export const topics = {
 			: 'Unfortunately no one suggested a topic. Please use `/wccc topics` again.'}`;
 	},
 	time(date) {
-		// const delta = Formatters.time(timestamp, 'R');
 		const delta = ~~((date.getTime() - Date.now()) / 1000) * 1000;
 		return `The Topic Suggestion Time will end in ${convertDuration(delta)}.`;
 	}

@@ -1,12 +1,15 @@
 import { Constants } from 'discord.js';
-import { convertDuration } from '../../../handlers/utils.js';
+import { convertDuration } from '../../../functions/utils.js';
 import { customIds, labels } from '../assets/identifiers.js';
 import { components } from '../assets/components.js';
 
 // the #wccc settings
 const values = {
+	// topic time
 	[customIds.config[0]]: 1000 * 60 * 5,
+	// topic max
 	[customIds.config[1]]: 5,
+	// voting time
 	[customIds.config[2]]: 1000 * 60 * 5,
 	amounts: [
 		2, 5, 10, 20
@@ -14,9 +17,6 @@ const values = {
 	durations: [
 		60, 300, 600, 1800, 3600, 7200, 43200, 86400
 	].map((v) => v *= 1000), // convert sec to ms
-	// timeouts: [
-	// 	120, 300, // delta!
-	// ],
 };
 
 // keep track of the selected values -> /wccc settings

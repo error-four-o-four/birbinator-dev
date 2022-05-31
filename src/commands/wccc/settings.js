@@ -1,22 +1,25 @@
-import {
-	ButtonInteraction,
-	Client,
-	Interaction,
-	InteractionCollector
-} from 'discord.js';
-
+// Identifiers
 import { customIds, labels } from './assets/identifiers.js';
+
+// Controllers
+import voting from './controllers/voting.js';
 import settings from './controllers/settings.js';
 
-import { getEmbed } from './assets/messages.js';
-import { createClickCollector } from '../../handlers/utils.js';
+// Utils
+import { getEphemeralReply, getEmbed } from './assets/messages.js';
+import { convertDuration, createClickCollector } from '../../functions/utils.js';
 
-/**
- *
- * @param {Client} client
- * @param {Interaction} interaction
- */
+export const description = `Configurates settings.`;
+
 export default async (client, interaction) => {
+	// guard cause
+	if (voting.state) {
+		const content = `**A vote is currently taking place.**\rEither end it manually with \`/wccc stop\` or wait until the time is over. It\'ll end in ${convertDuration(~~((voting.timestamp.getTime() - Date.now()) / 1000) * 1000)}.`;
+		const reply = getEphemeralReply(content);
+		await interaction.reply(reply);
+		return;
+	}
+
 	const clickCollector = createClickCollector(interaction);
 
 	const embed = getEmbed(client, {
@@ -55,7 +58,6 @@ export default async (client, interaction) => {
 	clickCollector.on('end', async (collected, reason) => {
 		const message = `Ended settings configuration. ${(reason === 'time') ? 'Time has expired.' : 'By User.'}`;
 
-		// controller.resetSelection();
 		settings.reset();
 		if (reason === 'time' || reason === 'ended') {
 			interaction.editReply({
@@ -69,12 +71,6 @@ export default async (client, interaction) => {
 	});
 };
 
-/**
- *
- * @param {ButtonInteraction} interaction
- * @param {InteractionCollector} collector
- * @param {object} embed
- */
 const handleButton = async (interaction, collector, embed) => {
 	const { customId } = interaction;
 	let components;
@@ -124,13 +120,6 @@ const handleButton = async (interaction, collector, embed) => {
 	collector.resetTimer();
 };
 
-/**
- *
- * @param {ButtonInteraction} interaction
- * @param {InteractionCollector} collector
- * @param {object} embed
- * @param {array} components
- */
 const handleSelection = async (interaction, collector) => {
 	settings.setSelection(interaction.customId, interaction.values[0]);
 	collector.resetTimer();

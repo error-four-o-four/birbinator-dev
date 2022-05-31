@@ -1,12 +1,9 @@
-import { Client, Interaction } from 'discord.js';
-import presences from '../../handlers/presences.js';
 import voting from './controllers/voting.js';
+import presences from './assets/presences.js';
 import { getEphemeralReply } from './assets/messages.js';
 
-/**
- * @param {Client} client
- * @param {Interaction} interaction
- */
+export const description = `Stops the suggestion or voting time manually.`;
+
 export default async (client, interaction) => {
 	const reply = getEphemeralReply()
 

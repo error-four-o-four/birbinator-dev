@@ -7,8 +7,6 @@ export const BOT_TOKEN = process.env.BOT_TOKEN;
 // ### BOT CONFIG
 export const botId = '969310807076790312';
 export const guildId = process.env.GUILD_ID;
-export const notifyId = '974624963682263050';
-export const moderatorId = '977873249440526376';
 
 export const roleIds = {
 	moderator: '977873249440526376',
@@ -38,22 +36,28 @@ export const intents = 46859;
 export const notion = {
 	dbId: '715cb2bf2c89445a83a836063bf2144c',
 	dbKey: process.env.NOTION_DB_TOKEN,
-	ids: {
-		topic: 'title',
-		emoji: '%5Es_g',
-		notes: 'EKSm',
-		stream_date: '%3DaeV',
-		suggested_by: 'Ez%3D%40',
-		suggested_topics: 'soBr',
-	}
+	keys: [
+		'topic',
+		'emoji',
+		'notes',
+		'stream_date',
+		'suggested_by',
+		'suggested_topics',
+	],
+	ids: [
+		'title',
+		'%5Es_g',
+		'EKSm',
+		'%3DaeV',
+		'Ez%3D%40',
+		'soBr',
+	]
 }
 
 export default {
 	BOT_TOKEN,
 	botId,
 	guildId,
-	notifyId,
-	moderatorId,
 	roleIds,
 	channelIds,
 	intents,

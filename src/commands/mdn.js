@@ -17,20 +17,12 @@ const options = [
 	}
 ];
 
-/**
- * Slash command data
- */
 export const data = {
 	name,
 	description,
 	options
 };
 
-/**
- * Slash command callback
- * @param {Client} client
- * @param {Interaction} interaction
- */
 export const execute = async (client, interaction) => {
 	const query = interaction.options.getString('search-query');
 	const reply = {};

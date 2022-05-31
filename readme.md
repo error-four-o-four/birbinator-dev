@@ -1,51 +1,37 @@
-# readme
+# Readme
 
 Adjust `.env`
 
-Use `npm run deploy` to register slash commands via discord api and make them accessible to the user.
+Use `npm run deploy` to register slash commands via discord api and make them accessible for the user.
 
 Use `npm run dev` for development.
 
 <br>
 
-`scr/bot.js` - entry point
+# Commands:
 
-`src/command.js` - *exports* command collection
+Commands are registered/loaded by reading the files in the commands-folder. Simply remove unnecessery/unwanted commands from the folder or add your own.
 
-<br>
-
-Commands are made of a property 'data' and a method 'execute'
+Commands consist of a property 'data' and a method 'execute'
 * 'data' contains necessary information like 'name' and 'description' and additional properties to define options, subcommands etc.
-* 'execute' is called from the clients event emitter via `onInteractionCreate`
-
+* 'execute' is called from the clients event emitter via `onInteractionCreate` in 'bot.js'
 <br>
 
-# todos / ideas
+## WCCC
 
-* update wccc readme
+### Settings
 
-### commands:
-* info
-	- additonal user data 'roles', 'moderatable'
-	- server info 'rules' channel
-* faq
-	- message content
-* wccc/vote
-	- l:32, l:80 controller
-	- voting ended in a draw
-	- notion
+### Message content
 
-### permissions
-### webhooks
-### debugging
-* add code comments
-* typos
+### Permissions
 
-### structure / files
-* functions/ folder?
-* presences.js
-  - so far only used by /wccc command
-	- move to commands/wccc/assets ?
-* commands/wccc/assets/utils.js => general utils ?
+### Notifications
 
-### rollup
+
+# Notion
+
+https://www.youtube.com/watch?v=zVfVLBjQuSA&ab_channel=WebDevSimplified
+
+# Todo
+
+use rollup/webpack

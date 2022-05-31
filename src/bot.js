@@ -4,11 +4,11 @@ import {
 } from "discord.js";
 
 import config from './config.js';
-import commands from './handlers/commands.js';
-import presences from './handlers/presences.js';
-import { logger } from './handlers/utils.js';
+import commands from './functions/commands.js';
+import presences from './commands/wccc/assets/presences.js';
 
 import { getErrorReply } from './commands/wccc/assets/messages.js';
+import { logger } from './functions/utils.js';
 
 const client = new Client({ intents: config.intents });
 
@@ -17,22 +17,6 @@ const client = new Client({ intents: config.intents });
  * @param {Client} client
  */
 const onReady = async (client) => {
-	// const guild = client.guilds.cache.get(config.guildId);
-	// const manager = (guild) ? guild.commands : client.application?.commands;
-
-	// clear cache - necessary?
-	// manager?.cache?.clear();
-	// await manager.fetch().then((collection) => collection.forEach(({ id }) => manager?.delete(id)));
-
-	// for (const command of commands.values()) {
-	// 	manager?.create(command.data);
-	// }
-
-	// @debug
-	// const logs = await commands.fetch().then(res => JSON.parse(JSON.stringify(res)))
-	// logs.forEach(cmd => console.log(cmd.id, cmd.options));
-	// console.log(`${commands.size} ${(commands.size === 1) ? 'command' : 'commands'} loaded`);
-
 	const presence = presences.getDefault(client);
 	client.user.setPresence(presence);
 };
@@ -47,7 +31,7 @@ const onInteractionCreate = async (client, interaction) => {
 	console.log(logger.red, `${logger.time()} ${interaction.user.tag} triggered an ${interaction.constructor.name}.`);
 
 	if (interaction.isCommand()) {
-		const { commandName, options } = interaction;
+		const { commandName } = interaction;
 		const command = commands.get(commandName);
 
 		if (!command) return;
@@ -72,8 +56,8 @@ process.on('unhandledRejection', console.error);
 (async () => {
 	console.clear();
 
-	client.on('warn', console.warn);
 	// client.on('debug', console.warn);
+	client.on('warn', console.warn);
 	client.on('ready', onReady);
 	client.on('interactionCreate', onInteractionCreate.bind(null, client));
 

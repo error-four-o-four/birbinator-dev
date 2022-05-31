@@ -39,57 +39,57 @@ const checkState = (interaction) => {
 };
 
 let topics = [
-	// {
-	// 	from: {
-	// 		id: '790552703058837514',
-	// 		bot: false,
-	// 		system: false,
-	// 		flags: [],
-	// 		username: 'error-four-o-four',
-	// 		discriminator: '7727',
-	// 		avatar: 'ec7dbe154a2812b3db4df5d3e9605d2c',
-	// 		banner: undefined,
-	// 		accentColor: undefined
-	// 	},
-	// 	content: 'one',
-	// 	hasEmoji: false,
-	// 	emoji: undefined,
-	// 	votes: 0,
-	// },
-	// {
-	// 	from: {
-	// 		id: '790552703058837514',
-	// 		bot: false,
-	// 		system: false,
-	// 		flags: [],
-	// 		username: 'error-four-o-four',
-	// 		discriminator: '7727',
-	// 		avatar: 'ec7dbe154a2812b3db4df5d3e9605d2c',
-	// 		banner: undefined,
-	// 		accentColor: undefined
-	// 	},
-	// 	content: 'two',
-	// 	hasEmoji: false,
-	// 	emoji: undefined,
-	// 	votes: 0,
-	// },
-	// {
-	// 	from: {
-	// 		id: '790552703058837514',
-	// 		bot: false,
-	// 		system: false,
-	// 		flags: [],
-	// 		username: 'error-four-o-four',
-	// 		discriminator: '7727',
-	// 		avatar: 'ec7dbe154a2812b3db4df5d3e9605d2c',
-	// 		banner: undefined,
-	// 		accentColor: undefined
-	// 	},
-	// 	content: 'three',
-	// 	hasEmoji: false,
-	// 	emoji: undefined,
-	// 	votes: 0,
-	// }
+	{
+		from: {
+			id: '790552703058837514',
+			bot: false,
+			system: false,
+			flags: [],
+			username: 'error-four-o-four',
+			discriminator: '7727',
+			avatar: 'ec7dbe154a2812b3db4df5d3e9605d2c',
+			banner: undefined,
+			accentColor: undefined
+		},
+		content: 'one',
+		hasEmoji: false,
+		emoji: undefined,
+		votes: 0,
+	},
+	{
+		from: {
+			id: '790552703058837514',
+			bot: false,
+			system: false,
+			flags: [],
+			username: 'error-four-o-four',
+			discriminator: '7727',
+			avatar: 'ec7dbe154a2812b3db4df5d3e9605d2c',
+			banner: undefined,
+			accentColor: undefined
+		},
+		content: 'two',
+		hasEmoji: false,
+		emoji: undefined,
+		votes: 0,
+	},
+	{
+		from: {
+			id: '790552703058837514',
+			bot: false,
+			system: false,
+			flags: [],
+			username: 'error-four-o-four',
+			discriminator: '7727',
+			avatar: 'ec7dbe154a2812b3db4df5d3e9605d2c',
+			banner: undefined,
+			accentColor: undefined
+		},
+		content: 'three',
+		hasEmoji: false,
+		emoji: undefined,
+		votes: 0,
+	}
 ];
 
 let topicCollector;
@@ -189,13 +189,13 @@ const stopCollectingVotes = (winner) => {
 	// }
 
 	if (winner) {
-		const data = {
-			topic: winner.content,
-			emoji: winner.emoji,
-			suggested_by: winner.from.username,
-			suggested_topics: topics.map((t) => `${t.content} (${t.votes})`).join(', '),
-		}
-		createNotionPage(data);
+		// const data = {
+		// 	topic: winner.content,
+		// 	emoji: winner.emoji,
+		// 	suggested_by: winner.from.username,
+		// 	suggested_topics: topics.map((t) => `${t.content} (${t.votes})`).join(', '),
+		// }
+		createNotionPage(winner, topics);
 		topics = [];
 	}
 

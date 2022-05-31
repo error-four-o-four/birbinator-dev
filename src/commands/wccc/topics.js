@@ -1,24 +1,17 @@
-import {
-	Client,
-	Interaction,
-	Message,
-	MessageCollector
-} from 'discord.js';
-
-import { createPromptCollector } from '../../handlers/utils.js';
-
-import presences from '../../handlers/presences.js';
+// Controller
 import voting from './controllers/voting.js';
 
+// Utils
+import { createPromptCollector } from '../../functions/utils.js';
 import { getPromptComponents } from './assets/components.js'
 import { getEphemeralReply } from './assets/messages.js';
 
+// Contents
+import presences from './assets/presences.js';
 import { topics as messages } from './assets/messages.js';
 
-/**
- * @param {Client} client
- * @param {Interaction} interaction
- */
+export const description = `Starts the Topic Suggestion Time.`;
+
 export default async (client, interaction) => {
 	// check state
 	if (!voting.checkState(interaction)) return;
@@ -41,11 +34,6 @@ export default async (client, interaction) => {
 	voting.topicCollector.on('end', evaluateTopics.bind(null, client, interaction));
 };
 
-/**
- * @param {MessageCollector} collector
- * @param {Message} message
- * @returns
- */
 const collectTopic = async (message) => {
 	const topic = voting.validateTopic(message.content);
 	const reply = getEphemeralReply();
@@ -69,7 +57,7 @@ const collectTopic = async (message) => {
 
 		if (reason === 'time' || collected.first().customId === 'prompt_cancel') {
 			reason = (reason === 'time') ? reason : 'canceled';
-			reply.content = message.userPrompt(reason);
+			reply.content = messages.userPrompt(reason);
 			reply.components = [];
 			await sent.edit(reply);
 			return;

@@ -1,17 +1,19 @@
-import { Constants, Client, Interaction, Collection } from 'discord.js';
-import { getPromptComponents } from './assets/components.js';
+import { Constants } from 'discord.js';
 
-import presences from '../../handlers/presences.js';
+// Controllers
 import settings from './controllers/settings.js';
 import voting from './controllers/voting.js';
 import { customIds } from './assets/identifiers.js';
+
+// Utils
+import { getPromptComponents } from './assets/components.js';
+
+// Contents
+import presences from './assets/presences.js';
 import { voting as messages } from './assets/messages.js';
 
+export const description = `Starts the voting.`;
 
-/**
- * @param {Client} client
- * @param {Interaction} interaction
- */
 export default async (client, interaction) => {
 	// check state
 	if (!voting.checkState(interaction)) return;
@@ -63,13 +65,18 @@ const evaluateVotes = async (client, interaction, collected) => {
 		const finalTopics = voting.topics.filter((t) => finalEmojis.includes(t.emoji));
 
 		voting.stopCollectingVotes();
-		voting.startCollectingVotes(sent, finalTopics);
+		await voting.startCollectingVotes(sent, finalTopics);
+
+		voting.voteCollector.on('end', evaluateVotes.bind(null, client, interaction));
+
+		console.log(voting.state);
+		console.log(voting.topicCollector);
 
 		return;
 	}
 
 	// add counts
-	sorted.forEach((c) =>	voting.topics.filter((t) => t.emoji === c.emoji.toString())[0].votes = c.count);
+	sorted.forEach((c) => voting.topics.filter((t) => t.emoji === c.emoji.toString())[0].votes = c.count);
 
 	const winner = voting.topics.filter((t) => t.emoji === final.first().emoji.toString())[0];
 

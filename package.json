@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "nodemon src/bot.js",
     "deploy": "node src/deploy.js",
-    "notion": "nodemon src/commands/wccc/controllers/notion.js"
+    "notionGetIds": "nodemon src/commands/wccc/controllers/notionGetIds.js",
+    "notionTest": "nodemon src/commands/wccc/controllers/notion.js"
   },
   "keywords": [
     "discord",

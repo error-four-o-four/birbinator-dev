@@ -1,75 +1,35 @@
-import { Constants, Formatters, Interaction } from 'discord.js';
+import { Constants, Formatters } from 'discord.js';
 import { roleIds, channelIds } from '../config.js';
 import { getEphemeralReply, getPermissionReply } from './wccc/assets/messages.js';
-
-/** @todo refactor */
-import guide from './wccc/guide.js';
-import past from './wccc/past.js';
-import time from './wccc/time.js';
-import settings from './wccc/settings.js';
-import stop from './wccc/stop.js';
-import topics from './wccc/topics.js';
-import vote from './wccc/vote.js';
+import { getFiles } from '../functions/utils.js';
 
 export const data = {
 	name: 'wccc',
 	description: `Create a voting! Collect topic suggestions and let users vote with emoji reactions.`,
-	options: [
-		{
-			name: 'guide',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: `Shows some guidelines.`,
-		},
-		{
-			name: 'past',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: `Sends a link to the past topics.`,
-		},
-		{
-			name: 'time',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: `Shows the time left to suggest a topic, to vote or until the stream starts.`,
-		},
-		{
-			name: 'settings',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: `Configurates settings.`,
-		},
-		{
-			name: 'stop',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: `Stops the suggestion or voting time manually.`,
-		},
-		{
-			name: 'topics',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: `Starts the Topic Suggestion Time.`,
-		},
-		{
-			name: 'vote',
-			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
-			description: `Starts the voting.`,
-		},
-	],
+	options: [],
 };
 
-const handler = {
-	guide,
-	past,
-	time,
-	// mods only
-	settings,
-	stop,
-	topics,
-	vote,
-};
+const createHandler = async (path) => {
+	const url = new URL(path, import.meta.url);
+	const files = await getFiles(url);
+	const actions = {};
 
-/**
- *
- * @param {*} client
- * @param {Interaction} interaction
- * @returns
- */
+	for (const file of files) {
+		const name = file.split('.')[0];
+		const action = await import(`${url}${file}`);
+		actions[name] = action;
+
+		data.options.push({
+			name,
+			type: Constants.ApplicationCommandOptionTypes.SUB_COMMAND,
+			description: action.description
+		})
+	}
+	return actions;
+}
+
+const handler = await createHandler('./wccc/');
+
 export const execute = async (client, interaction) => {
 	const action = interaction.options.data[0].name;
 

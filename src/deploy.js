@@ -7,8 +7,8 @@ import {
 	BOT_TOKEN
 } from './config.js';
 
-import { logger } from './handlers/utils.js';
-import commands from './handlers/commands.js';
+import { logger } from './functions/utils.js';
+import commands from './functions/commands.js';
 
 const data = commands.map((cmd) => cmd.data);
 const rest = new REST({ version: '9' }).setToken(BOT_TOKEN);
