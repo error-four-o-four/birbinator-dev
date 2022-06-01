@@ -39,8 +39,6 @@ export const getErrorReply = (reason) => {
 };
 
 ///////////////////////////////////////////////////////////////////// topics.js
-// controllers/votings.js
-// getTopicsEmbed() - settings + description
 
 const topicsTitle = `**Alright ${notification} People! It's Topic Suggestion Time**`;
 
@@ -48,6 +46,8 @@ const topicsDescription = `Write \`topic myFancyTopicSuggestion\` in this channe
 
 The bot will only acknowledge suggestions prefixed with \`topic\` and prompt you to confirm.`;
 
+// controllers/votings.js calls getTopicsEmbed()
+// which gets: settings + description
 export const topics = {
 	title: topicsTitle,
 	description: topicsDescription,
@@ -81,13 +81,13 @@ export const topics = {
 };
 
 ///////////////////////////////////////////////////////////////////// vote.js
-// controllers/votings.js
-// getVotingEmbed() - description + list + settings
 
 const votingTitle = `**Alright ${notification} People!**`;
 
 const votingDescription = `It's Time to vote the topic of this weeks challenge!\n\n`;
 
+// controllers/votings.js calls getVotingEmbed()
+// which gets: description + list + settings
 export const voting = {
 	title: votingTitle,
 	description: votingDescription,
@@ -122,7 +122,8 @@ export const voting = {
 
 ///////////////////////////////////////////////////////////////////// faq command
 
-const faqMessageContent = `The Weekly Creative Code Challenge **#WCCChallenge** is a friendly jam for generative artists and creative coders. Each week, the community suggests topics and we vote for the topic of the week. I review your submissions live on Twitch every Sunday. Everyone is welcome to participate, regardless of background or skill level. Beginners, experts, and everyone in between should feel welcome to share their creations.`;
+// not implemented
+// const faqMessageContent = `The Weekly Creative Code Challenge **#WCCChallenge** is a friendly jam for generative artists and creative coders. Each week, the community suggests topics and we vote for the topic of the week. I review your submissions live on Twitch every Sunday. Everyone is welcome to participate, regardless of background or skill level. Beginners, experts, and everyone in between should feel welcome to share their creations.`;
 
 ///////////////////////////////////////////////////////////////////// guide.js
 
@@ -141,7 +142,7 @@ const guideDescription = `- Post your creation in ${Formatters.channelMention(ch
 
 - You can submit more than one piece if you want but I might only review one of them
 
-- Submissions should fit the topic of the week (see :snail:topics-and-voting) (@todo)
+- Submissions should fit the topic of the week (see ${Formatters.channelMention(channelIds.voting)})
 
 - You may recycle old work if it fits the topic but I encourage you to submit work made this week
 
@@ -166,7 +167,7 @@ There you go: [#WCCChallenge Topics Notion](<https://sableraph.notion.site/afe97
 export default {
 	topics,
 	voting,
-	faqMessageContent,
+	// faqMessageContent,
 	guideTitle,
 	guideDescription,
 	pastMessageContent,
